@@ -3,16 +3,16 @@
 
 // GLM for an ordinal outcome with coherent priors
 functions {
-  
-  /** 
-  * Evaluate a given CDF
-  *
-  * @param x The point to evaluate the CDF_polr at
-  * @param link An integer indicating the link function
-  * @return A scalar on (0,1)
-  */
+
+  /**
+   * Evaluate a given CDF
+   *
+   * @param x The point to evaluate the CDF_polr at
+   * @param link An integer indicating the link function
+   * @return A scalar on (0,1)
+   */
   real CDF_polr(real x, int link) {
-    // links in MASS::polr() are in a different order than binomial() 
+    // links in MASS::polr() are in a different order than binomial()
     // logistic, probit, loglog, cloglog, cauchit
     if (link == 1) return(inv_logit(x));
     else if (link == 2) return(Phi(x));
@@ -22,76 +22,76 @@ functions {
     else reject("Invalid link");
     return x; // never reached
   }
-  
-  /** 
-  * Pointwise (pw) log-likelihood vector
-  *
-  * @param y The integer outcome variable.
-  * @param eta A vector of linear predictors
-  * @param cutpoints An ordered vector of cutpoints
-  * @param link An integer indicating the link function
-  * @return A vector of log-likelihods
-  */
-  vector pw_polr(int[] y, vector eta, vector cutpoints, 
+
+  /**
+   * Pointwise (pw) log-likelihood vector
+   *
+   * @param y The integer outcome variable.
+   * @param eta A vector of linear predictors
+   * @param cutpoints An ordered vector of cutpoints
+   * @param link An integer indicating the link function
+   * @return A vector of log-likelihods
+   */
+  vector pw_polr(int[] y, vector eta, vector cutpoints,
                  int link, real alpha) {
     int N = rows(eta);
     int J = rows(cutpoints) + 1;
     vector[N] ll;
-    if (link < 1 || link > 5) 
+    if (link < 1 || link > 5)
       reject("Invalid link");
-      
+
     if (alpha == 1) for (n in 1:N) {
-      if (y[n] == 1) ll[n] = CDF_polr(cutpoints[1] - eta[n], link);
-      else if (y[n] == J) ll[n] = 1 - CDF_polr(cutpoints[J - 1] - eta[n], link);
-      else ll[n] = CDF_polr(cutpoints[y[n]]     - eta[n], link) - 
-                   CDF_polr(cutpoints[y[n] - 1] - eta[n], link);
-    }
+        if (y[n] == 1) ll[n] = CDF_polr(cutpoints[1] - eta[n], link);
+        else if (y[n] == J) ll[n] = 1 - CDF_polr(cutpoints[J - 1] - eta[n], link);
+        else ll[n] = CDF_polr(cutpoints[y[n]]     - eta[n], link) -
+               CDF_polr(cutpoints[y[n] - 1] - eta[n], link);
+      }
     else for (n in 1:N) {
-      if (y[n] == 1) ll[n] = CDF_polr(cutpoints[1] - eta[n], link) ^ alpha;
-      else if (y[n] == J) ll[n] = 1 - CDF_polr(cutpoints[J - 1] - eta[n], link) ^ alpha;
-      else reject("alpha not allowed with more than 2 outcome categories")
-    }
+        if (y[n] == 1) ll[n] = CDF_polr(cutpoints[1] - eta[n], link) ^ alpha;
+        else if (y[n] == J) ll[n] = 1 - CDF_polr(cutpoints[J - 1] - eta[n], link) ^ alpha;
+        else reject("alpha not allowed with more than 2 outcome categories")
+               }
     return log(ll);
   }
-  
+
   /**
-  * Map from conditional probabilities to cutpoints
-  *
-  * @param probabilities A J-simplex
-  * @param scale A positive scalar
-  * @param link An integer indicating the link function
-  * @return A vector of length J - 1 whose elements are in increasing order
-  */
+   * Map from conditional probabilities to cutpoints
+   *
+   * @param probabilities A J-simplex
+   * @param scale A positive scalar
+   * @param link An integer indicating the link function
+   * @return A vector of length J - 1 whose elements are in increasing order
+   */
   vector make_cutpoints(vector probabilities, real scale, int link) {
-    int C = rows(probabilities) - 1; 
+    int C = rows(probabilities) - 1;
     vector[C] cutpoints;
     real running_sum = 0;
-    // links in MASS::polr() are in a different order than binomial() 
+    // links in MASS::polr() are in a different order than binomial()
     // logistic, probit, loglog, cloglog, cauchit
     if (link == 1) for(c in 1:C) {
-      running_sum += probabilities[c];
-      cutpoints[c] = logit(running_sum);
-    }
+        running_sum += probabilities[c];
+        cutpoints[c] = logit(running_sum);
+      }
     else if (link == 2) for(c in 1:C) {
-      running_sum += probabilities[c];
-      cutpoints[c] = inv_Phi(running_sum);
-    }
+        running_sum += probabilities[c];
+        cutpoints[c] = inv_Phi(running_sum);
+      }
     else if (link == 3) for(c in 1:C) {
-      running_sum += probabilities[c];
-      cutpoints[c] = -log(-log(running_sum));
-    }
+        running_sum += probabilities[c];
+        cutpoints[c] = -log(-log(running_sum));
+      }
     else if (link == 4) for(c in 1:C) {
-      running_sum += probabilities[c];
-      cutpoints[c] = log(-log1m(running_sum));
-    }
+        running_sum += probabilities[c];
+        cutpoints[c] = log(-log1m(running_sum));
+      }
     else if (link == 5) for(c in 1:C) {
-      running_sum += probabilities[c];
-      cutpoints[c] = tan(pi() * (running_sum - 0.5));
-    }
+        running_sum += probabilities[c];
+        cutpoints[c] = tan(pi() * (running_sum - 0.5));
+      }
     else reject("invalid link");
     return scale * cutpoints;
   }
-  
+
   /**
    * Randomly draw a value for utility
    *
@@ -104,37 +104,37 @@ functions {
   real draw_ystar_rng(real lower, real upper, real eta, int link) {
     int iter = 0;
     real ystar = not_a_number();
-    if (lower >= upper) 
+    if (lower >= upper)
       reject("lower must be less than upper");
-    
-    // links in MASS::polr() are in a different order than binomial() 
+
+    // links in MASS::polr() are in a different order than binomial()
     // logistic, probit, loglog, cloglog, cauchit
     if (link == 1) while(!(ystar > lower && ystar < upper))
-      ystar = logistic_rng(eta, 1);
+                     ystar = logistic_rng(eta, 1);
     else if (link == 2) while(!(ystar > lower && ystar < upper))
-      ystar = normal_rng(eta, 1);
+                          ystar = normal_rng(eta, 1);
     else if (link == 3) while(!(ystar > lower && ystar < upper))
-      ystar = gumbel_rng(eta, 1);
+                          ystar = gumbel_rng(eta, 1);
     else if (link == 4) while(!(ystar > lower && ystar < upper))
-      ystar = log(-log1m(uniform_rng(0,1)));
+                          ystar = log(-log1m(uniform_rng(0,1)));
     else if (link == 5) while(!(ystar > lower && ystar < upper))
-      ystar = cauchy_rng(eta, 1);
+                          ystar = cauchy_rng(eta, 1);
     else reject("invalid link");
     return ystar;
   }
-  
-  /** 
-  * faster version of csr_matrix_times_vector
-  * declared here and defined in C++
-  *
-  * @param m Integer number of rows
-  * @param n Integer number of columns
-  * @param w Vector (see reference manual)
-  * @param v Integer array (see reference manual)
-  * @param u Integer array (see reference manual)
-  * @param b Vector that is multiplied from the left by the CSR matrix
-  * @return A vector that is the product of the CSR matrix and b
-  */
+
+  /**
+   * faster version of csr_matrix_times_vector
+   * declared here and defined in C++
+   *
+   * @param m Integer number of rows
+   * @param n Integer number of columns
+   * @param w Vector (see reference manual)
+   * @param v Integer array (see reference manual)
+   * @param u Integer array (see reference manual)
+   * @param b Vector that is multiplied from the left by the CSR matrix
+   * @return A vector that is the product of the CSR matrix and b
+   */
   vector csr_matrix_times_vector2(int m, int n, vector w, int[] v, int[] u, vector b);
 }
 data {
@@ -172,7 +172,7 @@ transformed parameters {
   vector[K] beta;
   vector[J-1] cutpoints;
   {
-    real Delta_y; 
+    real Delta_y;
     if (K > 1) {
       Delta_y = inv_sqrt(1 - R2);
       beta = u[1] * sqrt(R2) * Delta_y * sqrt_Nm1;
@@ -211,7 +211,7 @@ generated quantities {
   vector[J > 2 ? J : 1] mean_PPD = rep_vector(0, J > 2 ? J : 1);
   vector[do_residuals ? N : 0] residuals;
   vector[J-1] zeta;
-  
+
   // xbar is actually post multiplied by R^-1
   if (dense_X) zeta = cutpoints + dot_product(xbar, beta);
   else zeta = cutpoints;
@@ -243,7 +243,7 @@ generated quantities {
         y_tilde = categorical_rng(theta);
         mean_PPD[y_tilde] += 1;
       }
-      
+
       if (do_residuals) {
         real ystar;
         if (y[n] == 1)

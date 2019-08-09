@@ -1,4 +1,4 @@
-  /** 
+  /**
    * Apply inverse link function to linear predictor
    * see help(binom) in R
    *
@@ -21,7 +21,7 @@
    * @param link An integer indicating the link function
    * @param eta0 A vector of linear predictors | y = 0
    * @param eta1 A vector of linear predictors | y = 1
-   * @param N An integer array of length 2 giving the number of 
+   * @param N An integer array of length 2 giving the number of
    *   observations where y = 0 and y = 1 respectively
    * @return lp__
    */
@@ -50,7 +50,7 @@
     return target();
   }
 
-  /** 
+  /**
    * Pointwise (pw) log-likelihood vector
    *
    * @param y The integer outcome variable. Note that function is
@@ -65,7 +65,7 @@
     if (link == 1) {  // logit
       for (n in 1:N) ll[n] = bernoulli_logit_lpmf(y | eta[n]);
     }
-    else if (link <= 5) {  // link = probit, cauchit, log, or cloglog 
+    else if (link <= 5) {  // link = probit, cauchit, log, or cloglog
       vector[N] pi = linkinv_bern(eta, link); // may not be stable
       for (n in 1:N) ll[n] = bernoulli_lpmf(y | pi[n]);
     }
@@ -73,7 +73,7 @@
     return ll;
   }
 
-  /** 
+  /**
    * Log-normalizing constant in the clogit case
    *
    * @param N_j Integer number of observations in the j-th group

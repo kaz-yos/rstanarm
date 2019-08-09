@@ -101,14 +101,14 @@ model {
     if (e_K > 0) e_eta_q = e_Xq * e_beta;
     else e_eta_q = rep_vector(0.0, nrow_e_Xq);
     if (assoc == 1) {
-        // declares y_eta_q{_eps,_lag,_auc}, y_eta_qwide{_eps,_lag,_auc},
-        //   y_q_wide{_eps,_lag,_auc}, mark{2,3}
+      // declares y_eta_q{_eps,_lag,_auc}, y_eta_qwide{_eps,_lag,_auc},
+      //   y_q_wide{_eps,_lag,_auc}, mark{2,3}
 #include /model/assoc_evaluate.stan
     }
 
     {
-    // declares log_basehaz, log_{haz_q,haz_etimes,surv_etimes,event}
-    // increments target with event log-lik
+      // declares log_basehaz, log_{haz_q,haz_etimes,surv_etimes,event}
+      // increments target with event log-lik
 #include /model/event_lp.stan
     }
   }
@@ -116,17 +116,17 @@ model {
   //---- Log priors
   // increments target with mvmer priors
 #include /model/priors_mvmer.stan
-    beta_lp(e_z_beta, e_prior_dist, e_prior_scale, e_prior_df,
-                    e_global_prior_df, e_local, e_global, e_mix, e_ool,
-                    e_slab_df, e_caux);
-    beta_lp(a_z_beta, a_prior_dist, a_prior_scale, a_prior_df,
-                    a_global_prior_df, a_local, a_global, a_mix, a_ool,
-                    a_slab_df, a_caux);
-    basehaz_lp(e_aux_unscaled, e_prior_dist_for_aux,
-                         e_prior_scale_for_aux, e_prior_df_for_aux);
-    if (e_has_intercept == 1)
-        gamma_lp(e_gamma[1], e_prior_dist_for_intercept, e_prior_mean_for_intercept,
-                         e_prior_scale_for_intercept, e_prior_df_for_intercept);
+  beta_lp(e_z_beta, e_prior_dist, e_prior_scale, e_prior_df,
+          e_global_prior_df, e_local, e_global, e_mix, e_ool,
+          e_slab_df, e_caux);
+  beta_lp(a_z_beta, a_prior_dist, a_prior_scale, a_prior_df,
+          a_global_prior_df, a_local, a_global, a_mix, a_ool,
+          a_slab_df, a_caux);
+  basehaz_lp(e_aux_unscaled, e_prior_dist_for_aux,
+             e_prior_scale_for_aux, e_prior_df_for_aux);
+  if (e_has_intercept == 1)
+    gamma_lp(e_gamma[1], e_prior_dist_for_intercept, e_prior_mean_for_intercept,
+             e_prior_scale_for_intercept, e_prior_df_for_intercept);
 }
 generated quantities {
   real e_alpha; // transformed intercept for event submodel

@@ -1,12 +1,12 @@
   /**
-  * Scale a vector of auxiliary parameters based on prior information
-  *
-  * @param aux_unscaled A vector, the unscaled auxiliary parameters
-  * @param prior_dist Integer, the type of prior distribution
-  * @param prior_mean,prior_scale Vectors, the mean and scale 
-  *   of the prior distribution
-  * @return A vector, corresponding to the scaled auxiliary parameters
-  */
+   * Scale a vector of auxiliary parameters based on prior information
+   *
+   * @param aux_unscaled A vector, the unscaled auxiliary parameters
+   * @param prior_dist Integer, the type of prior distribution
+   * @param prior_mean,prior_scale Vectors, the mean and scale
+   *   of the prior distribution
+   * @return A vector, corresponding to the scaled auxiliary parameters
+   */
   vector make_basehaz_coef(vector aux_unscaled, int prior_dist,
                            vector prior_mean, vector prior_scale) {
     vector[rows(aux_unscaled)] aux;
@@ -21,15 +21,15 @@
   }
 
   /**
-  * Log-prior for baseline hazard parameters
-  *
-  * @param aux_unscaled Vector (potentially of length 1) of unscaled
-  *   auxiliary parameter(s)
-  * @param dist Integer specifying the type of prior distribution
-  * @param scale Real specifying the scale for the prior distribution
-  * @param df Real specifying the df for the prior distribution
-  * @return nothing
-  */
+   * Log-prior for baseline hazard parameters
+   *
+   * @param aux_unscaled Vector (potentially of length 1) of unscaled
+   *   auxiliary parameter(s)
+   * @param dist Integer specifying the type of prior distribution
+   * @param scale Real specifying the scale for the prior distribution
+   * @param df Real specifying the df for the prior distribution
+   * @return nothing
+   */
   void basehaz_lp(vector aux_unscaled, int dist, vector scale, vector df) {
     if (dist > 0) {
       if (dist == 1)
@@ -42,19 +42,19 @@
   }
 
   /**
-  * Take the linear predictor and collapse across lower level
-  * units of the grouping factor clustered within patients, using
-  * the function specified by 'grp_assoc'
-  *
-  * @param eta The linear predictor evaluated for all the lower
-  *   level units, having some length greater than N.
-  * @param grp_idx An N-by-2 two dimensional array providing the
-  *   beginning and ending index of the lower level units in eta that
-  *   correspond to patient n (where n = 1,...,N).
-  * @param grp_assoc The method for collapsing across the lower
-  *   level units; 1=sum, 2=mean, 3=min, 4=max.
-  * @return A vector
-  */
+   * Take the linear predictor and collapse across lower level
+   * units of the grouping factor clustered within patients, using
+   * the function specified by 'grp_assoc'
+   *
+   * @param eta The linear predictor evaluated for all the lower
+   *   level units, having some length greater than N.
+   * @param grp_idx An N-by-2 two dimensional array providing the
+   *   beginning and ending index of the lower level units in eta that
+   *   correspond to patient n (where n = 1,...,N).
+   * @param grp_assoc The method for collapsing across the lower
+   *   level units; 1=sum, 2=mean, 3=min, 4=max.
+   * @return A vector
+   */
   vector collapse_within_groups(vector eta, int[,] grp_idx,
                                 int grp_assoc) {
     int N = size(grp_idx);
@@ -79,38 +79,38 @@
   }
 
   /**
-  * Create a design matrix for a shared random effects association
-  * structure in the joint model
-  *
-  * @param b Vector of group-specific coefficients
-  * @param l An integer array with the number of levels for the factor(s) on
-  *   the RHS of each |
-  * @param p An integer array with the number of variables on the LHS of each |
-  * @param pmat A matrix with the number variables on the LHS of each | in each
-  *   longitudinal submodel. The rows correspond to each |, meaning the separate
-  *   equations for each grouping variable, and the columns correspond to each
-  *   longitudinal submodel. If subject ID is the only grouping variable then the
-  *   matrix will have one row. If the joint model only has one longitudinal
-  *   submodel then the matrix will have one column.
-  * @param Npat Integer specifying number of individuals represented
-  *   in vector b
-  * @param qnodes The number of quadrature nodes
-  * @param which_b Integer array specifying the indices
-  *   of the random effects to use in the association structure
-  * @param sum_size_which_b Integer specifying total number of
-  *   random effects that are to be used in the association structure
-  * @param size_which_b Integer array specifying number of random effects from
-  *   each long submodel that are to be used in the association structure
-  * @param t_i Integer specifying the index of the grouping factor that
-  *   corresponds to the patient-level
-  * @param M An integer specifying the number of longitudinal submodels
-  * @return A matrix with the desired random effects represented
-  *   in columns, and the individuals on the rows; the matrix is
-  *   repeated (qnodes + 1) times (bounded by rows)
-  */
+   * Create a design matrix for a shared random effects association
+   * structure in the joint model
+   *
+   * @param b Vector of group-specific coefficients
+   * @param l An integer array with the number of levels for the factor(s) on
+   *   the RHS of each |
+   * @param p An integer array with the number of variables on the LHS of each |
+   * @param pmat A matrix with the number variables on the LHS of each | in each
+   *   longitudinal submodel. The rows correspond to each |, meaning the separate
+   *   equations for each grouping variable, and the columns correspond to each
+   *   longitudinal submodel. If subject ID is the only grouping variable then the
+   *   matrix will have one row. If the joint model only has one longitudinal
+   *   submodel then the matrix will have one column.
+   * @param Npat Integer specifying number of individuals represented
+   *   in vector b
+   * @param qnodes The number of quadrature nodes
+   * @param which_b Integer array specifying the indices
+   *   of the random effects to use in the association structure
+   * @param sum_size_which_b Integer specifying total number of
+   *   random effects that are to be used in the association structure
+   * @param size_which_b Integer array specifying number of random effects from
+   *   each long submodel that are to be used in the association structure
+   * @param t_i Integer specifying the index of the grouping factor that
+   *   corresponds to the patient-level
+   * @param M An integer specifying the number of longitudinal submodels
+   * @return A matrix with the desired random effects represented
+   *   in columns, and the individuals on the rows; the matrix is
+   *   repeated (qnodes + 1) times (bounded by rows)
+   */
   matrix make_x_assoc_shared_b(
-    vector b, int[] l, int[] p, int[,] pmat, int Npat, int qnodes,
-    int[] which_b, int sum_size_which_b, int[] size_which_b, int t_i, int M) {
+                               vector b, int[] l, int[] p, int[,] pmat, int Npat, int qnodes,
+                               int[] which_b, int sum_size_which_b, int[] size_which_b, int t_i, int M) {
     int prior_shift; // num. ranefs prior to subject-specific ranefs
     int start_store;
     int end_store;
@@ -149,47 +149,47 @@
       end_store   = i * Npat;
       x_assoc_shared_b[start_store:end_store,] = temp;
     }
-  return x_assoc_shared_b;
+    return x_assoc_shared_b;
   }
 
   /**
-  * Create a design matrix for a shared fixed + random effects association
-  * structure in the joint model
-  *
-  * @param b Vector of group-specific coefficients
-  * @param l An integer array with the number of levels for the factor(s) on
-  *   the RHS of each |
-  * @param p An integer array with the number of variables on the LHS of each |
-  * @param pmat A matrix with the number variables on the LHS of each | in each
-  *   longitudinal submodel. The rows correspond to each |, meaning the separate
-  *   equations for each grouping variable, and the columns correspond to each
-  *   longitudinal submodel. If subject ID is the only grouping variable then the
-  *   matrix will have one row. If the joint model only has one longitudinal
-  *   submodel then the matrix will have one column.
-  * @param Npat Integer specifying number of individuals represented
-  *   in vector b
-  * @param qnodes The number of quadrature nodes
-  * @param which_b Integer array specifying the indices
-  *   of the random effects to use in the association structure
-  * @param sum_size_which_b Integer specifying total number of
-  *   random effects that are to be used in the association structure
-  * @param size_which_b Integer array specifying number of random effects from
-  *   each long submodel that are to be used in the association structure
-  * @param t_i Integer specifying the index of the grouping factor that
-  *   corresponds to the patient-level
-  * @param M An integer specifying the number of longitudinal submodels
-  * @return A matrix with the desired random effects represented
-  *   in columns, and the individuals on the rows; the matrix is
-  *   repeated (qnodes + 1) times (bounded by rows)
-  */
+   * Create a design matrix for a shared fixed + random effects association
+   * structure in the joint model
+   *
+   * @param b Vector of group-specific coefficients
+   * @param l An integer array with the number of levels for the factor(s) on
+   *   the RHS of each |
+   * @param p An integer array with the number of variables on the LHS of each |
+   * @param pmat A matrix with the number variables on the LHS of each | in each
+   *   longitudinal submodel. The rows correspond to each |, meaning the separate
+   *   equations for each grouping variable, and the columns correspond to each
+   *   longitudinal submodel. If subject ID is the only grouping variable then the
+   *   matrix will have one row. If the joint model only has one longitudinal
+   *   submodel then the matrix will have one column.
+   * @param Npat Integer specifying number of individuals represented
+   *   in vector b
+   * @param qnodes The number of quadrature nodes
+   * @param which_b Integer array specifying the indices
+   *   of the random effects to use in the association structure
+   * @param sum_size_which_b Integer specifying total number of
+   *   random effects that are to be used in the association structure
+   * @param size_which_b Integer array specifying number of random effects from
+   *   each long submodel that are to be used in the association structure
+   * @param t_i Integer specifying the index of the grouping factor that
+   *   corresponds to the patient-level
+   * @param M An integer specifying the number of longitudinal submodels
+   * @return A matrix with the desired random effects represented
+   *   in columns, and the individuals on the rows; the matrix is
+   *   repeated (qnodes + 1) times (bounded by rows)
+   */
   matrix make_x_assoc_shared_coef(
-    vector b, vector beta, int[] KM, int M, int t_i,
-    int[] l, int[] p, int[,] pmat, int Npat, int qnodes,
-    int sum_size_which_coef, int[] size_which_coef,
-    int[] which_coef_zindex, int[] which_coef_xindex,
-    int[] has_intercept, int[] has_intercept_nob,
-    int[] has_intercept_lob, int[] has_intercept_upb,
-    real[] gamma_nob, real[] gamma_lob, real[] gamma_upb) {
+                                  vector b, vector beta, int[] KM, int M, int t_i,
+                                  int[] l, int[] p, int[,] pmat, int Npat, int qnodes,
+                                  int sum_size_which_coef, int[] size_which_coef,
+                                  int[] which_coef_zindex, int[] which_coef_xindex,
+                                  int[] has_intercept, int[] has_intercept_nob,
+                                  int[] has_intercept_lob, int[] has_intercept_upb,
+                                  real[] gamma_nob, real[] gamma_lob, real[] gamma_upb) {
 
     // in the loops below:
     //   t_i should only really ever equal 1 (since shared_coef association
@@ -269,5 +269,5 @@
       end_store   = i * Npat;
       x_assoc_shared_coef[start_store:end_store, ] = temp;
     }
-  return x_assoc_shared_coef;
+    return x_assoc_shared_coef;
   }
